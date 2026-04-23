@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gue Offline Tetep Bisa Baca</title>
+    <script src="tesseract.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; padding: 50px; }
+        .box { border: 2px dashed #444; padding: 20px; margin: 20px auto; max-width: 500px; cursor: pointer; }
+        #output { background: #222; padding: 20px; text-align: left; margin-top: 20px; border-radius: 10px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+    <h1>OCR OFFLINE ⚡</h1>
+    <div class="box" onclick="document.getElementById('input').click()">
+        Klik di sini buat pilih gambar
+    </div>
+    <input type="file" id="input" style="display:none" accept="image/*">
+    
+    <div id="status">Status: Ready</div>
+    <div id="output">Teks bakal muncul di sini...</div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            status.innerText = "Status: Lagi baca... Sabar!";
+            
+            // Inisialisasi Tesseract (Pake file lokal)
+            const worker = await Tesseract.createWorker('ind', 1, {
+                langPath: '.', // Ini perintah buat nyari file .traineddata di folder yang sama
+                gzip: true,
+                logger: m => console.log(m)
+            });
+
+            const { data: { text } } = await worker.recognize(file);
+            
+            output.innerText = text;
+            status.innerText = "Status: Selesai!";
+            await worker.terminate();
+        };
+    </script>
+</body>
+</html>
